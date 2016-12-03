@@ -12,9 +12,9 @@
 #define KWHT  "\x1B[37m"
 
 /* Methods */
-char* GetColor(int index)
+char* GetColor(int threadCode)
 {
-  switch(index % 6)
+  switch(threadCode % 6) // there is only 6 colors available: 3 of rgb and 3 of cmy
   {
     case 0:
       return KRED;

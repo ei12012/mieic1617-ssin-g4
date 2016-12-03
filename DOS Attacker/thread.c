@@ -1,5 +1,18 @@
 /*
+now:
 ./thread 172.30.31.181 1234 POST /test "var=bife" "Content-Type: application/x-www-form-urlencoded"
+
+goal:
+./thread conf.txt
+	IP ADDRESS
+	PORT
+	HTTP METHOD
+	PATH
+	HC "var=bife"
+	TIME_TO_SLEEP
+	DATA_MAX_SIZE
+	FRAGMENT_MAX_SIZE
+	HC "Content-Type: application/x-www-form-urlencoded"
 */
 #include <stdio.h>
 #include <stdlib.h>

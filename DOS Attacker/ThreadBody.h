@@ -11,7 +11,7 @@
 typedef struct _threadBody
 {
   int code; // know which thread i am
-  char* name;
+  char* name; // so its name
 
   int argc;
   char** argv;
@@ -19,31 +19,22 @@ typedef struct _threadBody
   char* color;
 } ThreadBody;
 
-void DoIT(ThreadBody* tb);
-void * ThreadBehaviour(void * tB);
+void StartRequest(ThreadBody* tb);
+void* ThreadBehaviour(void* tB);
 
-void * ThreadBehaviour(void * tB)
+void* ThreadBehaviour(void* tB)
 {
   ThreadBody* threadBody = (ThreadBody*)tB;
   threadBody->color = GetColor(threadBody->code);
 
   //printf("%sI am thread %d%s\n", color, threadBody->code, KWHT);
 
-  DoIT(threadBody);
-
-  //printf("Value of %s is %d\n", argument, value);
-
-	/*int i;
-	for(i = 0; i < 10; i++)
-	{
-    printf("%sThread %d is sleeping for %d seconds.%s\n", color, threadBody->code, i, KNRM);
-		sleep(1); // 1 second
-	}*/
+  StartRequest(threadBody);
 
 	return NULL;
 }
 
-void DoIT(ThreadBody * tb)
+void StartRequest(ThreadBody* tb)
 {
   int argc = tb->argc;
   char** argv = tb->argv;
