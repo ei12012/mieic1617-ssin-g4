@@ -1,0 +1,96 @@
+package server;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
+
+public class Server {
+	
+	static int maxConnections = 1;			// Max allowed TCP connections (0 = max allowed by system)
+	static int actualConnections = 0;
+
+    public static void main(String[] args) throws Exception {
+        HttpServer server = HttpServer.create(new InetSocketAddress(1234), maxConnections);
+        server.createContext("/test", new MyHandler());
+        server.setExecutor(null); // creates a default executor
+        server.start();
+    }
+
+    static class MyHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange httpExchange) throws IOException {
+        	
+        	long startTimer = System.currentTimeMillis();
+        	actualConnections++;
+        	
+        	/*while(actualConnections > maxConnections) {
+        		try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+        	}*/
+        	
+        	System.out.println("Processing Client " + httpExchange.getRemoteAddress().getAddress() + " : " + httpExchange.getRemoteAddress().getPort() + " ...");
+
+        	String method = httpExchange.getRequestMethod();
+        	String getData = httpExchange.getRequestURI().getQuery();
+        	String postData = readRequestBody(httpExchange);
+        	int dataSize = 0;
+        	
+        	String response = "Hello from server";
+
+        	System.out.println("Method = " + method);
+        	if(method.contains("GET")) {
+        		if(getData != null) {
+	        		dataSize = getData.length();
+	        		System.out.println("GET = " + dataSize + " bytes received");
+	        		response = "GET OK, " + dataSize + " bytes received";
+        		}
+        	}
+        	else if(method.contains("POST")) {
+        		if(postData != null) {
+	        		dataSize = postData.length();
+	        		System.out.println("POST = " + dataSize + " bytes received");
+	        		response = "POST OK, " + dataSize + " bytes received";
+        		}
+        	}
+        	
+        	httpExchange.sendResponseHeaders(200, response.length());
+            OutputStream os = httpExchange.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+            
+            long time = System.currentTimeMillis() - startTimer;
+        	System.out.println("Done in " + time + " ms\n");
+        	actualConnections--;
+        }
+    }
+
+    // ============================  HTTP Data Processors ============================================
+
+	private static String readRequestBody(HttpExchange httpExchange) {
+		String inputLine;
+		String requestBody = new String();
+
+		BufferedReader in = new BufferedReader(new InputStreamReader(httpExchange.getRequestBody()));
+
+		try {
+			while ((inputLine = in.readLine()) != null) {
+				requestBody = requestBody.concat(inputLine);
+			}
+			in.close();
+			return requestBody;
+		} catch (IOException e) {
+			System.err.println("Error - readRequestBody: ");
+			e.printStackTrace();
+		}
+		return null;
+	}
+}
