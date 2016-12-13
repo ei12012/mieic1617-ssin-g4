@@ -10,7 +10,7 @@
 #include "Color.h"
 
 #define DATA_SIZE 1000//1048576 //3145728 // 1 mb = 1024*1024 bytes
-#define FRAGMENT_SIZE 20//104857 //
+#define FRAGMENT_SIZE 200//104857 //
 #define TIME_TO_SLEEP 1 // in seconds
 
 typedef struct hostent HostEntity;

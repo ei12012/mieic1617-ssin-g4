@@ -21,7 +21,7 @@ goal:
 #include "ThreadBody.h"
 #include <pthread.h>
 
-#define numberThreads 150
+#define numberThreads 25
 pthread_t myThreads[numberThreads];
 
 /*
